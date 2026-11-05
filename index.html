@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0B0E11">
+  <meta name="description" content="Portafolio de Erwin Amir Farfán Cabada, desarrollador y diseñador de videojuegos indie. Survival horror low-poly en Unity y Unreal Engine. Brain Dead y No Exit.">
+  <title>Erwin Farfán — Indie Game Developer</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            void: '#0B0E11',
+            ash: '#151A1F',
+            steel: '#242B33',
+            bone: '#E9E5DE',
+            muted: '#8A939B',
+            blood: '#E23A3A',
+            hazard: '#FFB020'
+          },
+          fontFamily: {
+            display: ['"Bebas Neue"', 'sans-serif'],
+            tech: ['"Chakra Petch"', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { background-color: #0B0E11; color: #E9E5DE; font-family: 'Inter', sans-serif; }
+    ::selection { background: #E23A3A; color: #0B0E11; }
+
+    .hazard-strip {
+      background-image: repeating-linear-gradient(-45deg, #FFB020 0 10px, #0B0E11 10px 20px);
+    }
+
+    .grid-lines {
+      background-image:
+        linear-gradient(to right, rgba(233,229,222,.055) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(233,229,222,.055) 1px, transparent 1px);
+      background-size: 56px 56px;
+    }
+
+    .noise {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .75rem;
+      padding: 1rem 1.75rem;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      line-height: 1;
+      transition: transform .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary { background-color: #E23A3A; color: #0B0E11; }
+    .btn-primary:hover { background-color: #F05252; box-shadow: 0 14px 34px -12px rgba(226,58,58,.7); }
+
+    .btn-hazard { background-color: #FFB020; color: #0B0E11; }
+    .btn-hazard:hover { background-color: #FFC24D; box-shadow: 0 14px 34px -12px rgba(255,176,32,.55); }
+
+    .btn-ghost { border: 1px solid rgba(233,229,222,.22); color: #E9E5DE; clip-path: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px)); }
+    .btn-ghost:hover { border-color: #FFB020; color: #FFB020; }
+
+    .btn-sm { padding: .7rem 1.1rem; font-size: .66rem; letter-spacing: .16em; clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
+
+    .text-outline {
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(233,229,222,.22);
+    }
+
+    .field {
+      width: 100%;
+      background-color: #0B0E11;
+      border: 1px solid rgba(233,229,222,.15);
+      padding: .85rem 1rem;
+      color: #E9E5DE;
+      font-size: .875rem;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .field::placeholder { color: #6E7983; }
+    .field:focus { outline: none; border-color: #FFB020; box-shadow: 0 0 0 1px #FFB020; }
+    select.field { appearance: none; }
+
+    .label {
+      display: block;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: .65rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: #8A939B;
+      margin-bottom: .5rem;
+    }
+
+    .clip-logo { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
+
+    .marquee-track { animation: marquee 34s linear infinite; }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    [data-reveal] { transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+    .js [data-reveal] { opacity: 0; transform: translateY(22px); }
+    .js [data-reveal].is-visible { opacity: 1; transform: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .marquee-track { animation: none; }
+      .js [data-reveal] { opacity: 1; transform: none; transition: none; }
+      .btn:hover { transform: none; }
+    }
+  </style>
+</head>
+
+<body class="font-body antialiased overflow-x-hidden">
+
+  <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-hazard focus:px-4 focus:py-2 focus:font-tech focus:text-xs focus:font-bold focus:uppercase focus:text-void">
+    Saltar al contenido
+  </a>
+
+  <div class="pointer-events-none fixed inset-0 z-[60] noise opacity-[0.035]" aria-hidden="true"></div>
+
+  <header class="fixed inset-x-0 top-0 z-50">
+    <div class="hazard-strip h-1"></div>
+    <nav class="border-b border-white/10 bg-void/85 backdrop-blur-md" aria-label="Navegación principal">
+      <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
+
+        <a href="#inicio" class="group flex items-center gap-3">
+          <span class="clip-logo grid h-11 w-11 place-items-center bg-blood font-display text-2xl leading-none text-void transition-colors duration-200 group-hover:bg-hazard">EA</span>
+          <span class="leading-none">
+            <span class="block font-tech text-sm font-bold uppercase tracking-[0.16em] text-bone">Erwin Farfán</span>
+            <span class="mt-1 block font-tech text-[9px] uppercase tracking-[0.34em] text-muted">Indie Game Dev</span>
+          </span>
+        </a>
+
+        <div class="hidden items-center gap-8 lg:flex">
+          <a href="#juegos" class="font-tech text-[11px] font-semibold uppercase tracking-[0.22em] text-muted transition-colors hover:text-hazard">Juegos</a>
+          <a href="#sobre-mi" class="font-tech text-[11px] font-semibold uppercase tracking-[0.22em] text-muted transition-colors hover:text-hazard">Sobre mí</a>
+          <a href="#jams" class="font-tech text-[11px] font-semibold uppercase tracking-[0.22em] text-muted transition-colors hover:text-hazard">Game Jams</a>
+          <a href="#contacto" class="font-tech text-[11px] font-semibold uppercase tracking-[0.22em] text-muted transition-colors hover:text-hazard">Contacto</a>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="#contacto" class="btn btn-primary btn-sm hidden sm:inline-flex">Hablemos</a>
+          <button id="menu-button" type="button" class="grid h-11 w-11 place-items-center border border-white/15 text-bone transition-colors hover:border-hazard hover:text-hazard lg:hidden" aria-controls="mobile-menu" aria-expanded="false" aria-label="Abrir menú">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="mobile-menu" class="hidden border-t border-white/10 bg-void px-5 pb-6 pt-4 sm:px-8 lg:hidden">
+        <div class="flex flex-col divide-y divide-white/10">
+          <a href="#juegos" class="py-4 font-tech text-sm font-semibold uppercase tracking-[0.2em] text-bone">Juegos</a>
+          <a href="#sobre-mi" class="py-4 font-tech text-sm font-semibold uppercase tracking-[0.2em] text-bone">Sobre mí</a>
+          <a href="#jams" class="py-4 font-tech text-sm font-semibold uppercase tracking-[0.2em] text-bone">Game Jams</a>
+          <a href="#contacto" class="py-4 font-tech text-sm font-semibold uppercase tracking-[0.2em] text-bone">Contacto</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="contenido">
+
+    <section id="inicio" class="relative flex min-h-screen items-center overflow-hidden pb-20 pt-32 sm:pt-36">
+      <div class="absolute inset-0 grid-lines opacity-70" aria-hidden="true"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_10%,rgba(226,58,58,0.18),transparent_45%),radial-gradient(ellipse_at_90%_80%,rgba(255,176,32,0.10),transparent_40%)]" aria-hidden="true"></div>
+      <div class="absolute -left-32 top-1/3 h-96 w-96 rounded-full bg-blood/10 blur-[120px]" aria-hidden="true"></div>
+
+      <div class="relative mx-auto grid w-full max-w-7xl items-center gap-16 px-5 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+
+        <div data-reveal>
+          <div class="flex flex-wrap items-center gap-4">
+            <span class="inline-flex items-center gap-2 border border-white/15 bg-void/60 px-3 py-1.5 font-tech text-[10px] font-semibold uppercase tracking-[0.24em] text-muted">
+              <span class="h-1.5 w-1.5 bg-hazard"></span>
+              Unity · Unreal · C# / C++
+            </span>
+            <span class="font-tech text-[10px] uppercase tracking-[0.3em] text-muted">Portafolio 2026</span>
+          </div>
+
+          <h1 class="mt-8 font-display text-[4.4rem] leading-[0.82] tracking-tight sm:text-7xl lg:text-8xl xl:text-[8.6rem]">
+            Hago que<br>
+            sobrevivir<br>
+            <span class="text-blood">duela.</span>
+          </h1>
+
+          <p class="mt-8 max-w-xl text-[15px] leading-7 text-muted sm:text-base">
+            Desarrollador y diseñador de videojuegos independiente. Combino programación en <span class="text-bone">C# y C++</span> con arte 3D <span class="text-bone">low-poly</span> para crear supervivencias donde cada recurso, cada trampa y cada segundo importan.
+          </p>
+
+          <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <a href="#juegos" class="btn btn-primary">
+              Explorar mis juegos
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a href="#sobre-mi" class="btn btn-ghost">Conocer al desarrollador</a>
+          </div>
+
+          <p class="mt-5 font-tech text-[10px] uppercase tracking-[0.24em] text-muted">
+            Dos juegos. Dos motores. Una regla: cada recurso cuenta.
+          </p>
+
+          <div class="mt-10 grid max-w-lg grid-cols-3 divide-x divide-white/10 border-y border-white/10 py-5">
+            <div class="pr-3">
+              <p class="font-display text-3xl leading-none text-hazard">02</p>
+              <p class="mt-1 font-tech text-[9px] uppercase leading-4 tracking-[0.18em] text-muted">Juegos<br>destacados</p>
+            </div>
+            <div class="px-3">
+              <p class="font-display text-3xl leading-none text-hazard">02</p>
+              <p class="mt-1 font-tech text-[9px] uppercase leading-4 tracking-[0.18em] text-muted">Motores<br>Unity / Unreal</p>
+            </div>
+            <div class="pl-3">
+              <p class="font-display text-3xl leading-none text-hazard">06</p>
+              <p class="mt-1 font-tech text-[9px] uppercase leading-4 tracking-[0.18em] text-muted">Herramientas<br>del pipeline</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative mx-auto w-full max-w-md pb-14 sm:pb-0 lg:max-w-none" data-reveal style="transition-delay:120ms">
+          <div class="absolute -inset-8 bg-blood/20 blur-[90px]" aria-hidden="true"></div>
+
+          <div class="relative -rotate-2 border border-white/15 bg-ash p-3 shadow-[0_40px_90px_-25px_rgba(0,0,0,0.95)] transition-transform duration-500 hover:rotate-0">
+            <div class="absolute -right-3 -top-3 z-10 hazard-strip px-3 py-1 font-tech text-[9px] font-bold uppercase tracking-[0.2em] text-void">
+              Gameplay / GIF
+            </div>
+
+            <div class="relative aspect-[16/10] overflow-hidden bg-void">
+              <svg class="absolute inset-0 h-full w-full opacity-60" viewBox="0 0 800 500" preserveAspectRatio="none" aria-hidden="true">
+                <polygon fill="#151A1F" points="0,500 0,160 210,250 330,0 560,230 800,70 800,500"/>
+                <polygon fill="#FFB020" opacity=".22" points="0,160 210,250 330,0 560,230 800,70 800,500 620,500 380,300"/>
+                <polygon fill="#E23A3A" opacity=".26" points="330,0 560,230 800,500 380,300"/>
+                <polygon fill="#242B33" points="0,500 0,160 210,250 380,300 220,500"/>
+                <polygon fill="#E23A3A" opacity=".10" points="210,250 380,300 560,230 800,500 220,500"/>
+              </svg>
+              <div class="absolute inset-0 grid-lines opacity-40" aria-hidden="true"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-void via-void/20 to-transparent"></div>
+
+              <div class="absolute left-4 top-4 flex gap-2">
+                <span class="border border-white/20 bg-void/60 px-2 py-1 font-tech text-[8px] uppercase tracking-[0.2em] text-bone backdrop-blur">Survival horror</span>
+                <span class="border border-white/20 bg-void/60 px-2 py-1 font-tech text-[8px] uppercase tracking-[0.2em] text-bone backdrop-blur">PC</span>
+              </div>
+
+              <p class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-display text-6xl text-outline sm:text-7xl">NO EXIT</p>
+
+              <a href="#no-exit" class="absolute inset-0 grid place-items-center" aria-label="Ver No Exit">
+                <span class="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full border border-bone/40 bg-void/40 text-bone backdrop-blur transition duration-300 hover:scale-110 hover:border-hazard hover:text-hazard">
+                  <svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 translate-x-0.5" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                </span>
+              </a>
+
+              <div class="absolute inset-x-4 bottom-4 flex items-end justify-between">
+                <div>
+                  <p class="font-tech text-[8px] uppercase tracking-[0.3em] text-hazard">Proyecto 02</p>
+                  <p class="font-display text-3xl leading-none">No Exit</p>
+                </div>
+                <p class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">GIF 16:9</p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-4 px-1.5 pb-1 pt-3">
+              <p class="font-tech text-[10px] uppercase tracking-[0.22em] text-muted">La salida es la trampa.</p>
+              <p class="font-tech text-[10px] uppercase tracking-[0.22em] text-hazard">Unreal Engine</p>
+            </div>
+          </div>
+
+          <div class="absolute -bottom-8 -left-4 hidden w-48 rotate-3 border border-white/15 bg-void p-2 shadow-[0_25px_60px_-20px_rgba(0,0,0,0.9)] transition-transform duration-500 hover:rotate-0 sm:block lg:-left-10">
+            <div class="relative aspect-video overflow-hidden bg-ash">
+              <svg class="absolute inset-0 h-full w-full opacity-60" viewBox="0 0 400 225" preserveAspectRatio="none" aria-hidden="true">
+                <polygon fill="#E23A3A" opacity=".35" points="0,225 90,60 180,225"/>
+                <polygon fill="#FFB020" opacity=".18" points="90,60 220,0 300,120 180,225"/>
+                <polygon fill="#242B33" points="220,0 400,0 400,150 300,120"/>
+                <polygon fill="#151A1F" opacity=".8" points="0,225 180,225 300,120 400,150 400,225"/>
+              </svg>
+              <div class="absolute inset-0 bg-gradient-to-t from-void to-transparent"></div>
+              <p class="absolute inset-x-0 bottom-2 text-center font-display text-2xl">BRAIN DEAD</p>
+              <div class="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full border border-bone/30 bg-void/50">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="h-3 w-3 translate-x-px" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+            <div class="flex items-center justify-between px-1 pb-0.5 pt-2">
+              <span class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">Proyecto 01</span>
+              <span class="font-tech text-[8px] uppercase tracking-[0.2em] text-blood">Unity</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute bottom-6 left-1/2 hidden -translate-x-1/2 items-center gap-3 lg:flex" aria-hidden="true">
+        <span class="h-px w-10 bg-white/20"></span>
+        <span class="font-tech text-[9px] uppercase tracking-[0.34em] text-muted">Desliza para entrar</span>
+        <span class="h-px w-10 bg-white/20"></span>
+      </div>
+    </section>
+
+    <div class="relative overflow-hidden border-y border-white/10 bg-ash py-4" aria-hidden="true">
+      <div class="marquee-track flex w-max items-center gap-8">
+        <div class="flex items-center gap-8 font-display text-2xl tracking-wide text-bone/80">
+          <span>Survival horror</span><span class="text-blood">///</span>
+          <span>Low-poly</span><span class="text-hazard">///</span>
+          <span>Unity</span><span class="text-blood">///</span>
+          <span>Unreal Engine</span><span class="text-hazard">///</span>
+          <span>C#</span><span class="text-blood">///</span>
+          <span>C++</span><span class="text-hazard">///</span>
+          <span>3DS Max</span><span class="text-blood">///</span>
+          <span>Photoshop</span><span class="text-hazard">///</span>
+        </div>
+        <div class="flex items-center gap-8 font-display text-2xl tracking-wide text-bone/80">
+          <span>Survival horror</span><span class="text-blood">///</span>
+          <span>Low-poly</span><span class="text-hazard">///</span>
+          <span>Unity</span><span class="text-blood">///</span>
+          <span>Unreal Engine</span><span class="text-hazard">///</span>
+          <span>C#</span><span class="text-blood">///</span>
+          <span>C++</span><span class="text-hazard">///</span>
+          <span>3DS Max</span><span class="text-blood">///</span>
+          <span>Photoshop</span><span class="text-hazard">///</span>
+        </div>
+      </div>
+    </div>
+
+    <section id="juegos" class="relative scroll-mt-24 overflow-hidden py-24 sm:py-32">
+      <div class="absolute inset-0 grid-lines opacity-30" aria-hidden="true"></div>
+      <div class="relative mx-auto max-w-7xl px-5 sm:px-8">
+
+        <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between" data-reveal>
+          <div>
+            <p class="font-tech text-[11px] font-semibold uppercase tracking-[0.32em] text-blood">01 / Proyectos destacados</p>
+            <h2 class="mt-5 max-w-3xl font-display text-5xl leading-[0.9] sm:text-7xl lg:text-8xl">
+              Dos formas de<br><span class="text-outline">no salir con vida.</span>
+            </h2>
+          </div>
+          <p class="max-w-sm text-sm leading-7 text-muted">
+            Supervivencia, combate improvisado y una estética low-poly que no esconde la violencia. Estos son los dos mundos que estoy construyendo.
+          </p>
+        </div>
+
+        <div class="mt-16 space-y-10 lg:space-y-16">
+
+          <article class="group relative overflow-hidden border border-white/10 bg-void" data-reveal>
+            <div class="pointer-events-none absolute left-0 top-0 z-10 h-8 w-8 border-l-2 border-t-2 border-blood"></div>
+            <div class="pointer-events-none absolute bottom-0 right-0 z-10 h-8 w-8 border-b-2 border-r-2 border-blood"></div>
+
+            <div class="grid lg:grid-cols-[1.05fr_0.95fr]">
+
+              <div class="relative min-h-[320px] overflow-hidden border-b border-white/10 sm:aspect-video lg:aspect-auto lg:min-h-[600px] lg:border-b-0 lg:border-r">
+                <svg class="absolute inset-0 h-full w-full opacity-70 transition-transform duration-700 group-hover:scale-105" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true">
+                  <polygon fill="#151A1F" points="0,600 0,120 260,300 400,0 640,260 800,80 800,600"/>
+                  <polygon fill="#E23A3A" opacity=".34" points="400,0 640,260 800,80 800,600 520,420"/>
+                  <polygon fill="#FFB020" opacity=".16" points="0,120 260,300 0,600"/>
+                  <polygon fill="#2A323B" points="260,300 400,0 640,260 520,420"/>
+                  <polygon fill="#E23A3A" opacity=".13" points="0,600 260,300 520,420 800,600"/>
+                  <polygon fill="#E23A3A" opacity=".07" points="0,600 0,120 260,300 520,420"/>
+                </svg>
+                <div class="absolute inset-0 grid-lines opacity-40" aria-hidden="true"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-void via-void/10 to-void/40"></div>
+
+                <div class="absolute inset-x-5 top-5 flex items-center justify-between gap-3">
+                  <div class="flex gap-2">
+                    <span class="border border-white/20 bg-void/60 px-2.5 py-1 font-tech text-[9px] uppercase tracking-[0.2em] text-bone backdrop-blur">Survival shooter</span>
+                    <span class="hidden border border-white/20 bg-void/60 px-2.5 py-1 font-tech text-[9px] uppercase tracking-[0.2em] text-bone backdrop-blur sm:inline">Single player</span>
+                  </div>
+                  <span class="font-tech text-[10px] uppercase tracking-[0.24em] text-blood">Unity</span>
+                </div>
+
+                <p class="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-display text-6xl text-outline sm:text-8xl lg:text-7xl">BRAIN DEAD</p>
+
+                <a href="#" class="absolute inset-0 grid place-items-center" aria-label="Ver tráiler de Brain Dead">
+                  <span class="grid h-20 w-20 place-items-center rounded-full border border-bone/40 bg-void/40 text-bone backdrop-blur transition duration-300 group-hover:scale-110 group-hover:border-blood group-hover:text-blood">
+                    <svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 translate-x-0.5" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                  </span>
+                </a>
+
+                <div class="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4">
+                  <div>
+                    <p class="font-tech text-[9px] uppercase tracking-[0.28em] text-blood">Proyecto 01</p>
+                    <p class="mt-1 font-tech text-[10px] uppercase tracking-[0.2em] text-muted">Espacio para GIF / tráiler</p>
+                  </div>
+                  <p class="font-tech text-[9px] uppercase tracking-[0.2em] text-muted">16:9 · 1920×1080</p>
+                </div>
+              </div>
+
+              <div class="flex flex-col justify-center p-6 sm:p-10 lg:p-12">
+                <p class="font-tech text-[10px] font-semibold uppercase tracking-[0.3em] text-blood">01 / Shooter de supervivencia</p>
+
+                <div class="mt-4 flex flex-wrap items-end justify-between gap-3">
+                  <h3 class="font-display text-6xl leading-none sm:text-7xl">Brain Dead</h3>
+                  <span class="border border-white/15 px-2.5 py-1 font-tech text-[9px] uppercase tracking-[0.18em] text-muted">PC · Single player</span>
+                </div>
+
+                <p class="mt-3 font-tech text-base text-hazard">“La noche es tuya. El amanecer, no.”</p>
+
+                <p class="mt-5 text-sm leading-7 text-muted">
+                  Eres el último superviviente de un pequeño pueblo rodeado por el bosque. Sobrevive a las hordas de zombies hasta que el tiempo se agote y aprovecha la noche para preparar trampas con las que frenar y eliminar a los muertos.
+                </p>
+
+                <dl class="mt-7 grid grid-cols-2 gap-px border border-white/10 bg-white/10 sm:grid-cols-4">
+                  <div class="bg-void p-3">
+                    <dt class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">Género</dt>
+                    <dd class="mt-1 font-tech text-[11px] font-semibold text-bone">Survival shooter</dd>
+                  </div>
+                  <div class="bg-void p-3">
+                    <dt class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">Plataforma</dt>
+                    <dd class="mt-1 font-tech text-[11px] font-semibold text-bone">PC</dd>
+                  </div>
+                  <div class="bg-void p-3">
+                    <dt class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">Motor</dt>
+                    <dd class="mt-1 font-tech text-[11px] font-semibold text-bone">Unity</dd>
+                  </div>
+                  <div class="bg-void p-3">
+                    <dt class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">Modo</dt>
+                    <dd class="mt-1 font-tech text-[11px] font-semibold text-bone">Single player</dd>
+                  </div>
+                </dl>
+
+                <div class="mt-7">
+                  <p class="font-tech text-[9px] font-semibold uppercase tracking-[0.28em] text-muted">Mecánicas clave</p>
+                  <ul class="mt-3 space-y-2.5">
+                    <li class="flex gap-3 text-sm leading-6 text-bone/85">
+                      <span class="mt-0.5 font-tech text-[10px] font-bold text-blood">01</span>
+                      Oleadas contra reloj: aguanta hasta que el tiempo se agote.
+                    </li>
+                    <li class="flex gap-3 text-sm leading-6 text-bone/85">
+                      <span class="mt-0.5 font-tech text-[10px] font-bold text-blood">02</span>
+                      Preparación nocturna: coloca trampas y administra cada recurso.
+                    </li>
+                    <li class="flex gap-3 text-sm leading-6 text-bone/85">
+                      <span class="mt-0.5 font-tech text-[10px] font-bold text-blood">03</span>
+                      Combate rudo e improvisado: sin pausas ni segundas oportunidades.
+                    </li>
+                  </ul>
+                </div>
+
+                <p class="mt-6 border-l-2 border-blood/60 pl-3 font-tech text-[10px] uppercase tracking-[0.18em] text-muted">
+                  Rol en el juego: superviviente del apocalipsis
+                </p>
+
+                <div class="mt-7 flex flex-wrap gap-2.5">
+                  <a href="#" class="btn btn-primary btn-sm">Steam</a>
+                  <a href="#" class="btn btn-ghost btn-sm">Itch.io</a>
+                  <a href="#" class="btn btn-ghost btn-sm">Devlog</a>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="group relative overflow-hidden border border-white/10 bg-void" data-reveal>
+            <div class="pointer-events-none absolute left-0 top-0 z-10 h-8 w-8 border-l-2 border-t-2 border-hazard"></div>
+            <div class="pointer-events-none absolute bottom-0 right-0 z-10 h-8 w-8 border-b-2 border-r-2 border-hazard"></div>
+
+            <div class="grid lg:grid-cols-[1.05fr_0.95fr]">
+
+              <div class="relative order-1 min-h-[320px] overflow-hidden border-b border-white/10 sm:aspect-video lg:order-2 lg:aspect-auto lg:min-h-[600px] lg:border-b-0 lg:border-l">
+                <svg class="absolute inset-0 h-full w-full opacity-70 transition-transform duration-700 group-hover:scale-105" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true">
+                  <polygon fill="#151A1F" points="0,0 800,0 800,600 0,600"/>
+                  <polygon fill="#FFB020" opacity=".24" points="0,220 180,120 340,280 120,600 0,600"/>
+                  <polygon fill="#E23A3A" opacity=".26" points="180,120 420,0 620,180 340,280"/>
+                  <polygon fill="#2A323B" points="420,0 800,0 800,360 620,180"/>
+                  <polygon fill="#E23A3A" opacity=".11" points="340,280 620,180 800,360 800,600 500,600"/>
+                  <polygon fill="#FFB020" opacity=".08" points="0,600 120,600 180,120 0,220"/>
+                </svg>
+                <div class="absolute inset-0 grid-lines opacity-40" aria-hidden="true"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-void via-void/10 to-void/40"></div>
+
+                <div class="absolute inset-x-5 top-5 flex items-center justify-between gap-3">
+                  <div class="flex gap-2">
+                    <span class="border border-white/20 bg-void/60 px-2.5 py-1 font-tech text-[9px] uppercase tracking-[0.2em] text-bone backdrop-blur">Aventura de terror</span>
+                    <span class="hidden border border-white/20 bg-void/60 px-2.5 py-1 font-tech text-[9px] uppercase tracking-[0.2em] text-bone backdrop-blur sm:inline">Single player</span>
+                  </div>
+                  <span class="font-tech text-[10px] uppercase tracking-[0.24em] text-hazard">Unreal Engine</span>
+                </div>
+
+                <p class="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-display text-6xl text-outline sm:text-8xl lg:text-7xl">NO EXIT</p>
+
+                <a href="#" class="absolute inset-0 grid place-items-center" aria-label="Ver tráiler de No Exit">
+                  <span class="grid h-20 w-20 place-items-center rounded-full border border-bone/40 bg-void/40 text-bone backdrop-blur transition duration-300 group-hover:scale-110 group-hover:border-hazard group-hover:text-hazard">
+                    <svg viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 translate-x-0.5" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                  </span>
+                </a>
+
+                <div class="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4">
+                  <div>
+                    <p class="font-tech text-[9px] uppercase tracking-[0.28em] text-hazard">Proyecto 02</p>
+                    <p class="mt-1 font-tech text-[10px] uppercase tracking-[0.2em] text-muted">Espacio para GIF / tráiler</p>
+                  </div>
+                  <p class="font-tech text-[9px] uppercase tracking-[0.2em] text-muted">16:9 · 1920×1080</p>
+                </div>
+              </div>
+
+              <div class="order-2 flex flex-col justify-center p-6 sm:p-10 lg:order-1 lg:p-12">
+                <p class="font-tech text-[10px] font-semibold uppercase tracking-[0.3em] text-hazard">02 / Aventura de terror</p>
+
+                <div class="mt-4 flex flex-wrap items-end justify-between gap-3">
+                  <h3 class="font-display text-6xl leading-none sm:text-7xl">No Exit</h3>
+                  <span class="border border-white/15 px-2.5 py-1 font-tech text-[9px] uppercase tracking-[0.18em] text-muted">PC · Single player</span>
+                </div>
+
+                <p class="mt-3 font-tech text-base text-hazard">“La salida es la trampa.”</p>
+
+                <p class="mt-5 text-sm leading-7 text-muted">
+                  Un administrativo atrapado en un complejo tecnológico desierto tras un aparente incidente violento. Con un hacha de emergencia, desciende al peligroso Nivel -1 entre derrumbes, sabotea los suministros de energía y defiéndete de letales prototipos. La ruta de escape indicada es solo una trampa: al final te espera una criatura monstruosa. ¿Sobrevivirás a la persecución?
+                </p>
+
+                <dl class="mt-7 grid grid-cols-2 gap-px border border-white/10 bg-white/10 sm:grid-cols-4">
+                  <div class="bg-void p-3">
+                    <dt class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">Género</dt>
+                    <dd class="mt-1 font-tech text-[11px] font-semibold text-bone">Terror</dd>
+                  </div>
+                  <div class="bg-void p-3">
+                    <dt class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">Plataforma</dt>
+                    <dd class="mt-1 font-tech text-[11px] font-semibold text-bone">PC</dd>
+                  </div>
+                  <div class="bg-void p-3">
+                    <dt class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">Motor</dt>
+                    <dd class="mt-1 font-tech text-[11px] font-semibold text-bone">Unreal Engine</dd>
+                  </div>
+                  <div class="bg-void p-3">
+                    <dt class="font-tech text-[8px] uppercase tracking-[0.2em] text-muted">Modo</dt>
+                    <dd class="mt-1 font-tech text-[11px] font-semibold text-bone">Single player</dd>
+                  </div>
+                </dl>
+
+                <div class="mt-7">
+                  <p class="font-tech text-[9px] font-semibold uppercase tracking-[0.28em] text-muted">Mecánicas clave</p>
+                  <ul class="mt-3 space-y-2.5">
+                    <li class="flex gap-3 text-sm leading-6 text-bone/85">
+                      <span class="mt-0.5 font-tech text-[10px] font-bold text-hazard">01</span>
+                      Hacha de emergencia: tu herramienta, tu arma y tu última opción.
+                    </li>
+                    <li class="flex gap-3 text-sm leading-6 text-bone/85">
+                      <span class="mt-0.5 font-tech text-[10px] font-bold text-hazard">02</span>
+                      Nivel -1: derrumbes, sabotaje energético y exploración hostil.
+                    </li>
+                    <li class="flex gap-3 text-sm leading-6 text-bone/85">
+                      <span class="mt-0.5 font-tech text-[10px] font-bold text-hazard">03</span>
+                      Una persecución final contra algo que no debería existir.
+                    </li>
+                  </ul>
+                </div>
+
+                <p class="mt-6 border-l-2 border-hazard/60 pl-3 font-tech text-[10px] uppercase tracking-[0.18em] text-muted">
+                  Rol en el juego: oficinista armado
+                </p>
+
+                <div class="mt-7 flex flex-wrap gap-2.5">
+                  <a href="#" class="btn btn-hazard btn-sm">Steam</a>
+                  <a href="#" class="btn btn-ghost btn-sm">Itch.io</a>
+                  <a href="#" class="btn btn-ghost btn-sm">Devlog</a>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="sobre-mi" class="relative scroll-mt-24 overflow-hidden border-y border-white/10 bg-ash py-24 sm:py-32">
+      <div class="absolute inset-0 grid-lines opacity-30" aria-hidden="true"></div>
+      <div class="absolute right-0 top-0 h-72 w-72 rounded-full bg-hazard/10 blur-[120px]" aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-7xl px-5 sm:px-8">
+        <div class="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
+
+          <div data-reveal>
+            <p class="font-tech text-[11px] font-semibold uppercase tracking-[0.32em] text-hazard">02 / Sobre mí & habilidades</p>
+            <h2 class="mt-5 max-w-2xl font-display text-5xl leading-[0.9] sm:text-7xl">
+              Programo el miedo.<br>
+              <span class="text-outline">También lo esculpo.</span>
+            </h2>
+
+            <div class="mt-8 space-y-5 text-sm leading-7 text-muted sm:text-[15px]">
+              <p>
+                Soy <span class="text-bone">Erwin Amir Farfán Cabada</span>, desarrollador y diseñador de videojuegos independiente. Mi trabajo vive en la intersección entre la programación y el arte: escribo sistemas en <span class="text-bone">C# y C++</span>, y después modelo, texturizo e ilumino el mundo que los habita en <span class="text-bone">3DS Max y Photoshop</span>. Trabajo en <span class="text-bone">Unity y Unreal Engine</span>, y disfruto especialmente los proyectos donde una estética low-poly choca con una jugabilidad madura, tensa y visceral.
+              </p>
+              <p>
+                Para mí, diseñar un juego es una pregunta constante: ¿qué le quito al jugador para que cada decisión pese? Esa filosofía guía <span class="text-bone">Brain Dead</span> y <span class="text-bone">No Exit</span>, dos supervivencias donde los recursos escasean, el combate es improvisado y la salida nunca es lo que parece.
+              </p>
+            </div>
+
+            <div class="mt-9 flex items-center gap-4 border-t border-white/10 pt-6">
+              <span class="clip-logo grid h-12 w-12 place-items-center bg-blood font-display text-2xl text-void">EA</span>
+              <div>
+                <p class="font-tech text-sm font-semibold tracking-wide text-bone">Erwin Amir Farfán Cabada</p>
+                <p class="mt-1 font-tech text-[9px] uppercase tracking-[0.28em] text-muted">Game developer · Game designer · 3D artist</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-4" data-reveal style="transition-delay:100ms">
+
+            <div class="border border-white/10 bg-void p-6 transition-colors duration-300 hover:border-blood/50">
+              <div class="flex items-center justify-between">
+                <p class="font-tech text-[10px] font-bold uppercase tracking-[0.28em] text-blood">Programación</p>
+                <span class="font-tech text-[10px] text-muted">01</span>
+              </div>
+              <p class="mt-4 text-sm leading-6 text-muted">Sistemas de combate, supervivencia, trampas, IA de enemigos, UI y prototipado rápido.</p>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">C#</span>
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">C++</span>
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">Unity</span>
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">Unreal Engine</span>
+              </div>
+            </div>
+
+            <div class="border border-white/10 bg-void p-6 transition-colors duration-300 hover:border-hazard/50">
+              <div class="flex items-center justify-between">
+                <p class="font-tech text-[10px] font-bold uppercase tracking-[0.28em] text-hazard">Arte & 3D</p>
+                <span class="font-tech text-[10px] text-muted">02</span>
+              </div>
+              <p class="mt-4 text-sm leading-6 text-muted">Modelado low-poly, texturizado, iluminación, composición y dirección de arte.</p>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">3DS Max</span>
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">Photoshop</span>
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">Low-poly</span>
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">Texturizado</span>
+              </div>
+            </div>
+
+            <div class="border border-white/10 bg-void p-6 transition-colors duration-300 hover:border-bone/40">
+              <div class="flex items-center justify-between">
+                <p class="font-tech text-[10px] font-bold uppercase tracking-[0.28em] text-bone">Diseño de juego</p>
+                <span class="font-tech text-[10px] text-muted">03</span>
+              </div>
+              <p class="mt-4 text-sm leading-6 text-muted">Game feel, level design, economía de recursos, ritmo de tensión y pruebas de concepto.</p>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">Game design</span>
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">Level design</span>
+                <span class="border border-white/15 px-2.5 py-1 font-tech text-[10px] uppercase tracking-[0.14em] text-bone">Game feel</span>
+              </div>
+            </div>
+
+            <div class="border border-dashed border-white/15 p-4">
+              <p class="font-tech text-[9px] uppercase tracking-[0.28em] text-muted">Pipeline de trabajo</p>
+              <div class="mt-3 flex flex-wrap items-center gap-x-2 gap-y-2 font-tech text-[10px] uppercase tracking-[0.14em] text-bone/80">
+                <span>Concepto</span><span class="text-blood">→</span>
+                <span>Prototipo</span><span class="text-blood">→</span>
+                <span>Arte</span><span class="text-blood">→</span>
+                <span>Prueba</span><span class="text-blood">→</span>
+                <span>Iteración</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="jams" class="relative scroll-mt-24 overflow-hidden py-24 sm:py-32">
+      <div class="absolute inset-0 grid-lines opacity-30" aria-hidden="true"></div>
+      <div class="relative mx-auto max-w-7xl px-5 sm:px-8">
+
+        <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between" data-reveal>
+          <div>
+            <p class="font-tech text-[11px] font-semibold uppercase tracking-[0.32em] text-blood">03 / Game jams & prototipos</p>
+            <h2 class="mt-5 font-display text-5xl leading-[0.9] sm:text-7xl">El laboratorio.</h2>
+          </div>
+          <p class="max-w-sm text-sm leading-7 text-muted">
+            Aquí es donde una idea rara sobrevive o muere en 48 horas. Espacio reservado para jams, mecánicas experimentales y pruebas de concepto.
+          </p>
+        </div>
+
+        <div class="mt-14 grid gap-5 md:grid-cols-3">
+
+          <article class="group flex flex-col border border-white/10 bg-ash/60 transition-colors duration-300 hover:border-hazard/50" data-reveal>
+            <div class="relative flex aspect-video items-center justify-center overflow-hidden border-b border-dashed border-white/15 bg-void">
+              <div class="absolute inset-0 grid-lines opacity-40" aria-hidden="true"></div>
+              <div class="relative grid h-12 w-12 place-items-center border border-white/20 text-muted transition-colors group-hover:border-hazard group-hover:text-hazard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-5 w-5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </div>
+              <span class="absolute left-4 top-4 font-tech text-[8px] uppercase tracking-[0.24em] text-muted">Slot 01</span>
+              <span class="absolute bottom-4 right-4 font-tech text-[8px] uppercase tracking-[0.24em] text-hazard">GIF / captura</span>
+            </div>
+            <div class="flex flex-1 flex-col p-6">
+              <p class="font-tech text-[9px] font-semibold uppercase tracking-[0.24em] text-hazard">Game jam · 48h</p>
+              <h3 class="mt-3 font-display text-3xl leading-none">Tu próxima jam</h3>
+              <p class="mt-3 flex-1 text-sm leading-6 text-muted">Cuenta la restricción, el equipo y la mecánica que nació de la presión del reloj.</p>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <span class="border border-white/15 px-2 py-1 font-tech text-[9px] uppercase tracking-[0.12em] text-bone/80">Unity</span>
+                <span class="border border-white/15 px-2 py-1 font-tech text-[9px] uppercase tracking-[0.12em] text-bone/80">48h</span>
+              </div>
+              <a href="#" class="mt-5 inline-flex items-center gap-2 font-tech text-[10px] font-semibold uppercase tracking-[0.2em] text-bone transition-colors hover:text-hazard">
+                Añadir enlace
+                <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </article>
+
+          <article class="group flex flex-col border border-white/10 bg-ash/60 transition-colors duration-300 hover:border-hazard/50" data-reveal style="transition-delay:100ms">
+            <div class="relative flex aspect-video items-center justify-center overflow-hidden border-b border-dashed border-white/15 bg-void">
+              <div class="absolute inset-0 grid-lines opacity-40" aria-hidden="true"></div>
+              <div class="relative grid h-12 w-12 place-items-center border border-white/20 text-muted transition-colors group-hover:border-hazard group-hover:text-hazard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-5 w-5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </div>
+              <span class="absolute left-4 top-4 font-tech text-[8px] uppercase tracking-[0.24em] text-muted">Slot 02</span>
+              <span class="absolute bottom-4 right-4 font-tech text-[8px] uppercase tracking-[0.24em] text-hazard">GIF / captura</span>
+            </div>
+            <div class="flex flex-1 flex-col p-6">
+              <p class="font-tech text-[9px] font-semibold uppercase tracking-[0.24em] text-hazard">Prototipo · Combate</p>
+              <h3 class="mt-3 font-display text-3xl leading-none">Prueba de game feel</h3>
+              <p class="mt-3 flex-1 text-sm leading-6 text-muted">Un sistema de combate, una trampa o una persecución que necesitaba sentirse antes de existir.</p>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <span class="border border-white/15 px-2 py-1 font-tech text-[9px] uppercase tracking-[0.12em] text-bone/80">Unreal</span>
+                <span class="border border-white/15 px-2 py-1 font-tech text-[9px] uppercase tracking-[0.12em] text-bone/80">C++</span>
+              </div>
+              <a href="#" class="mt-5 inline-flex items-center gap-2 font-tech text-[10px] font-semibold uppercase tracking-[0.2em] text-bone transition-colors hover:text-hazard">
+                Añadir enlace
+                <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </article>
+
+          <article class="group flex flex-col border border-white/10 bg-ash/60 transition-colors duration-300 hover:border-hazard/50" data-reveal style="transition-delay:200ms">
+            <div class="relative flex aspect-video items-center justify-center overflow-hidden border-b border-dashed border-white/15 bg-void">
+              <div class="absolute inset-0 grid-lines opacity-40" aria-hidden="true"></div>
+              <div class="relative grid h-12 w-12 place-items-center border border-white/20 text-muted transition-colors group-hover:border-hazard group-hover:text-hazard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-5 w-5" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </div>
+              <span class="absolute left-4 top-4 font-tech text-[8px] uppercase tracking-[0.24em] text-muted">Slot 03</span>
+              <span class="absolute bottom-4 right-4 font-tech text-[8px] uppercase tracking-[0.24em] text-hazard">GIF / captura</span>
+            </div>
+            <div class="flex flex-1 flex-col p-6">
+              <p class="font-tech text-[9px] font-semibold uppercase tracking-[0.24em] text-hazard">Prueba de arte · Low-poly</p>
+              <h3 class="mt-3 font-display text-3xl leading-none">Experimento visual</h3>
+              <p class="mt-3 flex-1 text-sm leading-6 text-muted">Estudios de forma, color e iluminación para encontrar la identidad visual de un mundo.</p>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <span class="border border-white/15 px-2 py-1 font-tech text-[9px] uppercase tracking-[0.12em] text-bone/80">3DS Max</span>
+                <span class="border border-white/15 px-2 py-1 font-tech text-[9px] uppercase tracking-[0.12em] text-bone/80">Photoshop</span>
+              </div>
+              <a href="#" class="mt-5 inline-flex items-center gap-2 font-tech text-[10px] font-semibold uppercase tracking-[0.2em] text-bone transition-colors hover:text-hazard">
+                Añadir enlace
+                <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contacto" class="relative scroll-mt-24 overflow-hidden border-t border-white/10 bg-ash py-24 sm:py-32">
+      <div class="absolute inset-0 grid-lines opacity-25" aria-hidden="true"></div>
+      <div class="absolute -left-24 bottom-0 h-80 w-80 rounded-full bg-blood/10 blur-[110px]" aria-hidden="true"></div>
+
+      <div class="relative mx-auto max-w-7xl px-5 sm:px-8">
+        <div class="grid gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
+
+          <div data-reveal>
+            <p class="font-tech text-[11px] font-semibold uppercase tracking-[0.32em] text-blood">04 / Contacto & redes</p>
+            <h2 class="mt-5 max-w-xl font-display text-5xl leading-[0.9] sm:text-7xl">
+              ¿Tienes un proyecto que no te deja dormir?
+            </h2>
+            <p class="mt-6 max-w-md text-sm leading-7 text-muted">
+              Busco colaboraciones donde el diseño y la programación vayan de la mano. Si tienes una idea, una jam o un proyecto indie en marcha, escríbeme.
+            </p>
+
+            <a href="mailto:contacto@erwinfarfan.dev" class="mt-8 inline-flex items-center gap-3 border-b border-hazard/50 pb-1 font-tech text-sm font-semibold tracking-wide text-hazard transition-colors hover:border-hazard hover:text-bone">
+              contacto@erwinfarfan.dev
+              <span aria-hidden="true">↗</span>
+            </a>
+
+            <div class="mt-12">
+              <p class="font-tech text-[9px] font-semibold uppercase tracking-[0.28em] text-muted">Encuéntrame en</p>
+              <div class="mt-4 grid gap-2.5 sm:grid-cols-2">
+                <a href="#" class="group flex items-center justify-between border border-white/10 bg-void px-4 py-3.5 transition-colors hover:border-hazard">
+                  <span>
+                    <span class="block font-tech text-xs font-semibold uppercase tracking-[0.16em] text-bone">GitHub</span>
+                    <span class="mt-0.5 block font-tech text-[9px] tracking-wide text-muted">Código y prototipos</span>
+                  </span>
+                  <span class="text-hazard transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true">↗</span>
+                </a>
+                <a href="#" class="group flex items-center justify-between border border-white/10 bg-void px-4 py-3.5 transition-colors hover:border-hazard">
+                  <span>
+                    <span class="block font-tech text-xs font-semibold uppercase tracking-[0.16em] text-bone">Itch.io</span>
+                    <span class="mt-0.5 block font-tech text-[9px] tracking-wide text-muted">Juegos y demos</span>
+                  </span>
+                  <span class="text-hazard transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true">↗</span>
+                </a>
+                <a href="#" class="group flex items-center justify-between border border-white/10 bg-void px-4 py-3.5 transition-colors hover:border-hazard">
+                  <span>
+                    <span class="block font-tech text-xs font-semibold uppercase tracking-[0.16em] text-bone">LinkedIn</span>
+                    <span class="mt-0.5 block font-tech text-[9px] tracking-wide text-muted">Perfil profesional</span>
+                  </span>
+                  <span class="text-hazard transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true">↗</span>
+                </a>
+                <a href="#" class="group flex items-center justify-between border border-white/10 bg-void px-4 py-3.5 transition-colors hover:border-hazard">
+                  <span>
+                    <span class="block font-tech text-xs font-semibold uppercase tracking-[0.16em] text-bone">X / Twitter</span>
+                    <span class="mt-0.5 block font-tech text-[9px] tracking-wide text-muted">Devlogs y avances</span>
+                  </span>
+                  <span class="text-hazard transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true">↗</span>
+                </a>
+                <a href="#" class="group flex items-center justify-between border border-white/10 bg-void px-4 py-3.5 transition-colors hover:border-hazard sm:col-span-2">
+                  <span>
+                    <span class="block font-tech text-xs font-semibold uppercase tracking-[0.16em] text-bone">Discord</span>
+                    <span class="mt-0.5 block font-tech text-[9px] tracking-wide text-muted">Comunidad y playtesting</span>
+                  </span>
+                  <span class="text-hazard transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true">↗</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="border border-white/10 bg-void p-6 sm:p-8 lg:p-10" data-reveal style="transition-delay:120ms">
+            <div class="flex items-center justify-between border-b border-white/10 pb-5">
+              <p class="font-tech text-[10px] font-semibold uppercase tracking-[0.28em] text-bone">Formulario directo</p>
+              <span class="font-tech text-[9px] uppercase tracking-[0.2em] text-muted">01 / 01</span>
+            </div>
+
+            <form action="#" method="post" class="mt-6 space-y-5">
+              <div class="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label for="nombre" class="label">Nombre</label>
+                  <input id="nombre" name="nombre" type="text" class="field" placeholder="Tu nombre" required>
+                </div>
+                <div>
+                  <label for="email" class="label">Email</label>
+                  <input id="email" name="email" type="email" class="field" placeholder="tu@correo.com" required>
+                </div>
+              </div>
+
+              <div>
+                <label for="asunto" class="label">Asunto</label>
+                <div class="relative">
+                  <select id="asunto" name="asunto" class="field pr-10" required>
+                    <option value="" disabled selected>Selecciona una opción</option>
+                    <option value="colaboracion">Colaboración</option>
+                    <option value="publicacion">Publicación / Prensa</option>
+                    <option value="freelance">Freelance</option>
+                    <option value="otro">Otro</option>
+                  </select>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-hazard" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              </div>
+
+              <div>
+                <label for="mensaje" class="label">Mensaje</label>
+                <textarea id="mensaje" name="mensaje" rows="5" class="field resize-none" placeholder="Cuéntame qué tienes en mente, el alcance y los plazos." required></textarea>
+              </div>
+
+              <div class="flex flex-col gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
+                <button type="submit" class="btn btn-primary">
+                  Enviar mensaje
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+                <p class="font-tech text-[9px] uppercase leading-4 tracking-[0.16em] text-muted">Sin spam. Solo proyectos<br class="hidden sm:block"> que valga la pena jugar.</p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="relative overflow-hidden border-t border-white/10 bg-void">
+    <div class="hazard-strip h-1.5"></div>
+    <div class="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+      <div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="font-display text-4xl leading-none sm:text-5xl">Erwin Amir Farfán Cabada</p>
+          <p class="mt-2 font-tech text-[9px] uppercase tracking-[0.3em] text-muted">Indie game developer · Unity / Unreal · C# / C++ · 3DS Max / Photoshop</p>
+        </div>
+        <div class="flex flex-wrap gap-x-6 gap-y-2">
+          <a href="#juegos" class="font-tech text-[10px] uppercase tracking-[0.2em] text-muted transition-colors hover:text-hazard">Juegos</a>
+          <a href="#sobre-mi" class="font-tech text-[10px] uppercase tracking-[0.2em] text-muted transition-colors hover:text-hazard">Sobre mí</a>
+          <a href="#jams" class="font-tech text-[10px] uppercase tracking-[0.2em] text-muted transition-colors hover:text-hazard">Game Jams</a>
+          <a href="#contacto" class="font-tech text-[10px] uppercase tracking-[0.2em] text-muted transition-colors hover:text-hazard">Contacto</a>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p class="font-tech text-[9px] uppercase tracking-[0.18em] text-muted">© <span id="year">2026</span> Erwin Amir Farfán Cabada. Todos los derechos reservados.</p>
+        <a href="#inicio" class="inline-flex items-center gap-2 font-tech text-[9px] uppercase tracking-[0.22em] text-muted transition-colors hover:text-hazard">
+          Volver arriba
+          <span aria-hidden="true">↑</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const menuButton = document.getElementById('menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuButton.addEventListener('click', () => {
+      const open = menuButton.getAttribute('aria-expanded') === 'true';
+      menuButton.setAttribute('aria-expanded', String(!open));
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    mobileMenu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        menuButton.setAttribute('aria-expanded', 'false');
+        mobileMenu.classList.add('hidden');
+      });
+    });
+
+    const revealElements = document.querySelectorAll('[data-reveal]');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    revealElements.forEach((element) => observer.observe(element));
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
